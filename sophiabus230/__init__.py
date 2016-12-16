@@ -29,10 +29,11 @@ def _sanitize_entry(entry):
     Sanitize the entry by removing the extra spaces and empty lines
 
     :param entry: the entry to sanitize
-    :return: the entry without unecessary spaces
+    :return: the entry without unnecessary spaces
     :rtype: str
     """
     sane_line = re.sub(r"^\s+$", '\n', entry)
+    sane_line = re.sub(r"\s+$", '', sane_line)
     sane_line.replace(u"é", "e")
     if len(sane_line) > 1:
         return sane_line
@@ -53,7 +54,7 @@ def _parse_entry(entry):
     :rtype: dict
     """
     split_entry = entry.split(' ')
-    idx_end_direction = -1
+    idx_end_direction = len(split_entry)
     is_real_time = True
     tz_paris = gettz('Europe/Paris')
     if split_entry[-1] == '*':
@@ -75,7 +76,7 @@ def _parse_entry(entry):
     return {'bus_time': bus_time, 'dest': dest, 'is_real_time': is_real_time}
 
 
-def get_next_buses():
+def get_next_buses(debug=False):
     """
     Fetches the list of upcoming buses at the INRIA bus stop for the bus 230 towards Nice
 
@@ -91,7 +92,7 @@ def get_next_buses():
     for e in data[0].div.get_text().split('\n'):
         sane_entry = _sanitize_entry(e)
         if sane_entry is not None:
-            print sane_entry
+            if debug:
+                print '[DEBUG]: {0}'.format(sane_entry.encode('utf-8'))
             tt.append(_parse_entry(sane_entry))
     return tt
-
