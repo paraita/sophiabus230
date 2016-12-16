@@ -10,5 +10,9 @@ setup(name='sophiabus230',
       author='Paraita Wohler',
       author_email='paraita.wohler@gmail.com',
       license='',
-      packages=[],
+      packages=['sophiabus230'],
+      install_requires=[
+          'beautifulsoup4',
+          'python-dateutil'
+      ],
       zip_safe=False)
