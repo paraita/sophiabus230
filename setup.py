@@ -15,4 +15,6 @@ setup(name='sophiabus230',
           'beautifulsoup4',
           'python-dateutil'
       ],
+      test_suite='nose.collector',
+      tests_require=['mock', 'nose', 'nose-cover3'],
       zip_safe=False)

@@ -87,9 +87,11 @@ def get_next_buses(debug=False):
     soup = BeautifulSoup(content, "html.parser")
     for br in soup.find_all("br"):
         br.replace_with('\n')
-    data = soup.find_all("div", attrs={"class": "data"})
+    data = [e for e in soup.find_all("div", attrs={"class": "data"}) if '230' in e.get_text()]
+    assert len(data) <= 1
     tt = []
-    for e in data[0].div.get_text().split('\n'):
+    data_230 = data[0]
+    for e in data_230.div.get_text().split('\n'):
         sane_entry = _sanitize_entry(e)
         if sane_entry is not None:
             if debug:
