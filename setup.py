@@ -9,12 +9,12 @@ setup(name='sophiabus230',
       url='http://github.com/paraita/sophiabus230',
       author='Paraita Wohler',
       author_email='paraita.wohler@gmail.com',
-      license='',
+      license='MIT',
       packages=['sophiabus230'],
       install_requires=[
           'beautifulsoup4',
           'python-dateutil'
       ],
       test_suite='nose.collector',
-      tests_require=['mock', 'nose', 'nose-cover3'],
+      tests_require=['mock', 'nose'],
       zip_safe=False)
