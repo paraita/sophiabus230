@@ -83,18 +83,19 @@ def get_next_buses(debug=False):
     :return: upcoming buses
     :rtype: list
     """
+    tt = []
     content = _get_html_from_cg06(1939)
     soup = BeautifulSoup(content, "html.parser")
     for br in soup.find_all("br"):
         br.replace_with('\n')
     data = [e for e in soup.find_all("div", attrs={"class": "data"}) if '230' in e.get_text()]
-    assert len(data) <= 1
-    tt = []
-    data_230 = data[0]
-    for e in data_230.div.get_text().split('\n'):
-        sane_entry = _sanitize_entry(e)
-        if sane_entry is not None:
-            if debug:
-                print '[DEBUG]: {0}'.format(sane_entry.encode('utf-8'))
-            tt.append(_parse_entry(sane_entry))
+    if len(data) != 0:
+        assert len(data) <= 1
+        data_230 = data[0]
+        for e in data_230.div.get_text().split('\n'):
+            sane_entry = _sanitize_entry(e)
+            if sane_entry is not None:
+                if debug:
+                    print '[DEBUG]: {0}'.format(sane_entry.encode('utf-8'))
+                tt.append(_parse_entry(sane_entry))
     return tt
