@@ -70,6 +70,7 @@ def _parse_entry(entry):
         # case for later upcoming bus
         tzinfos = {'FR': tz_paris}
         bus_time = parse(split_entry[1], tzinfos=tzinfos)
+        bus_time.replace(tzinfo=tz_paris)
         idx_start_direction = 3
     dest = ' '.join(split_entry[idx_start_direction:idx_end_direction])
     dest = dest.encode('utf-8')
