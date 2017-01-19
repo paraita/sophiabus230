@@ -4,7 +4,7 @@
 from setuptools import setup
 
 setup(name='sophiabus230',
-      version='0.2',
+      version='0.4',
       description='Module to get the timetable of the Sophia Antipolis bus line 230',
       url='http://github.com/paraita/sophiabus230',
       author='Paraita Wohler',
@@ -13,7 +13,8 @@ setup(name='sophiabus230',
       packages=['sophiabus230'],
       install_requires=[
           'beautifulsoup4',
-          'python-dateutil'
+          'python-dateutil',
+          'future'
       ],
       test_suite='nose.collector',
       tests_require=[

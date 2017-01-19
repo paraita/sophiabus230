@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import urllib
+from future.moves.urllib.request import urlopen
+
 import re
 from datetime import datetime
 from dateutil.parser import parse
 from dateutil.tz import gettz
 from datetime import timedelta
 from bs4 import BeautifulSoup
+import logging
 
 
 def _get_html_from_cg06(stop_id):
@@ -19,7 +21,7 @@ def _get_html_from_cg06(stop_id):
     :rtype: str
     """
     cg06_url = "http://cg06.tsi.cityway.fr/qrcode/?id={0}"
-    req = urllib.urlopen(cg06_url.format(stop_id))
+    req = urlopen(cg06_url.format(stop_id))
     content = req.read()
     return content
 
@@ -84,6 +86,8 @@ def get_next_buses(debug=False):
     :return: upcoming buses
     :rtype: list
     """
+    if debug:
+        logging.basicConfig(level=logging.INFO)
     tt = []
     content = _get_html_from_cg06(1939)
     soup = BeautifulSoup(content, "html.parser")
@@ -97,6 +101,6 @@ def get_next_buses(debug=False):
             sane_entry = _sanitize_entry(e)
             if sane_entry is not None:
                 if debug:
-                    print '[DEBUG]: {0}'.format(sane_entry.encode('utf-8'))
+                    logging.info('found {0}'.format(sane_entry.encode('utf-8')))
                 tt.append(_parse_entry(sane_entry))
     return tt
