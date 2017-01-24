@@ -10,4 +10,3 @@ pbr==1.10.0
 python-dateutil==2.6.0
 requests==2.12.4
 six==1.10.0
-sophiabus230==0.1

@@ -75,7 +75,7 @@ def _parse_entry(entry):
         bus_time.replace(tzinfo=tz_paris)
         idx_start_direction = 3
     dest = ' '.join(split_entry[idx_start_direction:idx_end_direction])
-    dest = dest.encode('utf-8')
+    dest = dest
     return {'bus_time': bus_time, 'dest': dest, 'is_real_time': is_real_time}
 
 
@@ -104,3 +104,6 @@ def get_next_buses(debug=False):
                     logging.info('found {0}'.format(sane_entry.encode('utf-8')))
                 tt.append(_parse_entry(sane_entry))
     return tt
+
+
+get_next_buses()

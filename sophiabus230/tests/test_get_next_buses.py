@@ -15,7 +15,7 @@ class TestSophiabus230(TestCase):
     @patch('sophiabus230._get_html_from_cg06')
     def test_get_next_buses(self, mock_content):
         parent_path = os.path.dirname(os.path.abspath(__file__))
-        with open(parent_path + os.sep + "example_content.html", 'r') as fd:
+        with open(parent_path + os.sep + "example_content.html", 'rb') as fd:
             mock_content.return_value = fd.read()
         tz_paris = gettz('Europe/Paris')
         result_list = sophiabus230.get_next_buses(debug=True)
@@ -24,9 +24,9 @@ class TestSophiabus230(TestCase):
         actual_dest = result_list[0]['dest']
         actual_is_real_time = result_list[0]['is_real_time']
         actual_bus_time = result_list[0]['bus_time']
-        expected_dest = 'Cathédrale-Vieille Ville'
+        expected_dest = u'Cathédrale-Vieille Ville'
         expected_is_real_time = True
-        assert actual_dest == expected_dest
+        self.assertEqual(actual_dest, expected_dest)
         assert actual_is_real_time == expected_is_real_time
         assert actual_bus_time.year == expected_bus_time.year
         assert actual_bus_time.month == expected_bus_time.month
