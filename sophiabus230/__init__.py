@@ -37,13 +37,14 @@ def _sanitize_entry(entry, debug=False):
     """
     if debug:
         logging.basicConfig(level=logging.INFO)
-        logging.info("To sanitize: %s", entry)
+        logging.info("To sanitize: |%s|", entry)
     sane_line = re.sub(r"^\s+$", '\n', entry)
     sane_line = re.sub(r"\s+$", '', sane_line)
     sane_line = re.sub(r"^\s+", '', sane_line)
     sane_line.replace(u"é", "e")
     if len(sane_line) > 1:
         return sane_line
+    logging.info('empty entry !')
     return None
 
 
@@ -110,7 +111,7 @@ def get_next_buses(stop_id=1939, bus_id=230, debug=False):
     if len(data) != 0:
         assert len(data) <= 1
         data_230 = data[0].div.get_text()
-        data_230 = data_230.replace("à ", "DELIMITERà ")
+        data_230 = data_230.replace(u"à ", u"DELIMITERà ")
         data_230 = data_230.replace("dans ", "DELIMITERdans ")
         for e in data_230.split('DELIMITER'):
             sane_entry = _sanitize_entry(e, debug)
