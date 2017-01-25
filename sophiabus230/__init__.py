@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-from future.moves.urllib.request import urlopen
-
+"""
+This module fetches the timetable of the bus 230 in Sophia Antipolis
+"""
 import re
+import logging
 from datetime import datetime
+from datetime import timedelta
 from dateutil.parser import parse
 from dateutil.tz import gettz
-from datetime import timedelta
 from bs4 import BeautifulSoup
-import logging
+from future.moves.urllib.request import urlopen
 
 
 def _get_html_from_cg06(stop_id):
@@ -39,11 +40,10 @@ def _sanitize_entry(entry):
     sane_line.replace(u"é", "e")
     if len(sane_line) > 1:
         return sane_line
-    else:
-        return None
+    return None
 
 
-def _parse_entry(entry):
+def _parse_entry(entry, debug=False):
     """
     Convert a entry into a dict containing the following attributes:
 
@@ -55,6 +55,9 @@ def _parse_entry(entry):
     :return: a dict representing the relevant information of the string
     :rtype: dict
     """
+    if debug:
+        logging.basicConfig(level=logging.INFO)
+
     split_entry = entry.split(' ')
     idx_end_direction = len(split_entry)
     is_real_time = True
@@ -79,7 +82,7 @@ def _parse_entry(entry):
     return {'bus_time': bus_time, 'dest': dest, 'is_real_time': is_real_time}
 
 
-def get_next_buses(debug=False):
+def get_next_buses(stop_id=1939, bus_id=230, debug=False):
     """
     Fetches the list of upcoming buses at the INRIA bus stop for the bus 230 towards Nice
 
@@ -89,11 +92,11 @@ def get_next_buses(debug=False):
     if debug:
         logging.basicConfig(level=logging.INFO)
     tt = []
-    content = _get_html_from_cg06(1939)
+    content = _get_html_from_cg06(stop_id)
     soup = BeautifulSoup(content, "html.parser")
     for br in soup.find_all("br"):
         br.replace_with('\n')
-    data = [e for e in soup.find_all("div", attrs={"class": "data"}) if '230' in e.get_text()]
+    data = [e for e in soup.find_all("div", attrs={"class": "data"}) if str(bus_id) in e.get_text()]
     if len(data) != 0:
         assert len(data) <= 1
         data_230 = data[0]
@@ -101,9 +104,6 @@ def get_next_buses(debug=False):
             sane_entry = _sanitize_entry(e)
             if sane_entry is not None:
                 if debug:
-                    logging.info('found {0}'.format(sane_entry.encode('utf-8')))
-                tt.append(_parse_entry(sane_entry))
+                    logging.info('found %s', sane_entry.encode('utf-8'))
+                tt.append(_parse_entry(sane_entry, debug))
     return tt
-
-
-get_next_buses()
