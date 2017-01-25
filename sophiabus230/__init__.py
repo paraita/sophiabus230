@@ -27,7 +27,7 @@ def _get_html_from_cg06(stop_id):
     return content
 
 
-def _sanitize_entry(entry):
+def _sanitize_entry(entry, debug=False):
     """
     Sanitize the entry by removing the extra spaces and empty lines
 
@@ -35,8 +35,12 @@ def _sanitize_entry(entry):
     :return: the entry without unnecessary spaces
     :rtype: str
     """
+    if debug:
+        logging.basicConfig(level=logging.INFO)
+        logging.info("To sanitize: %s", entry)
     sane_line = re.sub(r"^\s+$", '\n', entry)
     sane_line = re.sub(r"\s+$", '', sane_line)
+    sane_line = re.sub(r"^\s+", '', sane_line)
     sane_line.replace(u"é", "e")
     if len(sane_line) > 1:
         return sane_line
@@ -57,6 +61,7 @@ def _parse_entry(entry, debug=False):
     """
     if debug:
         logging.basicConfig(level=logging.INFO)
+        logging.info("parsing the following entry: %s", entry)
 
     split_entry = entry.split(' ')
     idx_end_direction = len(split_entry)
@@ -72,10 +77,13 @@ def _parse_entry(entry, debug=False):
         bus_time = date_now + timedelta(minutes=delta_minutes)
         idx_start_direction = 4
     else:
-        # case for later upcoming bus
-        tzinfos = {'FR': tz_paris}
-        bus_time = parse(split_entry[1], tzinfos=tzinfos)
-        bus_time.replace(tzinfo=tz_paris)
+        if 'approche' in split_entry[1]:
+            bus_time = datetime.now(tz=tz_paris)
+        else:
+            # case for later upcoming bus
+            tzinfos = {'FR': tz_paris}
+            bus_time = parse(split_entry[1], tzinfos=tzinfos)
+            bus_time.replace(tzinfo=tz_paris)
         idx_start_direction = 3
     dest = ' '.join(split_entry[idx_start_direction:idx_end_direction])
     dest = dest
@@ -94,14 +102,14 @@ def get_next_buses(stop_id=1939, bus_id=230, debug=False):
     tt = []
     content = _get_html_from_cg06(stop_id)
     soup = BeautifulSoup(content, "html.parser")
+    data = [e for e in soup.find_all("div", attrs={"class": "data"}) if str(bus_id) in e.get_text()]
     for br in soup.find_all("br"):
         br.replace_with('\n')
-    data = [e for e in soup.find_all("div", attrs={"class": "data"}) if str(bus_id) in e.get_text()]
     if len(data) != 0:
         assert len(data) <= 1
         data_230 = data[0]
         for e in data_230.div.get_text().split('\n'):
-            sane_entry = _sanitize_entry(e)
+            sane_entry = _sanitize_entry(e, debug)
             if sane_entry is not None:
                 if debug:
                     logging.info('found %s', sane_entry.encode('utf-8'))
