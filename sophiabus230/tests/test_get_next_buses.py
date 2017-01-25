@@ -12,9 +12,8 @@ from mock import patch
 
 class TestSophiabus230(TestCase):
 
-    @patch('datetime.datetime.now')
     @patch('sophiabus230._get_html_from_cg06')
-    def test_get_next_buses(self, mock_content, mock_date):
+    def test_get_next_buses(self, mock_content):
         parent_path = os.path.dirname(os.path.abspath(__file__))
         with open(parent_path + os.sep + "example_content.html", 'rb') as fd:
             mock_content.return_value = fd.read()
