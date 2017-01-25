@@ -64,6 +64,8 @@ def _parse_entry(entry, debug=False):
         logging.info("parsing the following entry: %s", entry)
 
     split_entry = entry.split(' ')
+    if debug:
+        logging.info("split entry: %s", split_entry)
     idx_end_direction = len(split_entry)
     is_real_time = True
     tz_paris = gettz('Europe/Paris')
@@ -86,8 +88,10 @@ def _parse_entry(entry, debug=False):
             bus_time.replace(tzinfo=tz_paris)
         idx_start_direction = 3
     dest = ' '.join(split_entry[idx_start_direction:idx_end_direction])
-    dest = dest
-    return {'bus_time': bus_time, 'dest': dest, 'is_real_time': is_real_time}
+    parsed_entry = {'bus_time': bus_time, 'dest': dest, 'is_real_time': is_real_time}
+    if debug:
+        logging.info("parsed entry: %s", parsed_entry)
+    return parsed_entry
 
 
 def get_next_buses(stop_id=1939, bus_id=230, debug=False):
@@ -103,15 +107,15 @@ def get_next_buses(stop_id=1939, bus_id=230, debug=False):
     content = _get_html_from_cg06(stop_id)
     soup = BeautifulSoup(content, "html.parser")
     data = [e for e in soup.find_all("div", attrs={"class": "data"}) if str(bus_id) in e.get_text()]
-    for br in soup.find_all("br"):
-        br.replace_with('\n')
     if len(data) != 0:
         assert len(data) <= 1
-        data_230 = data[0]
-        for e in data_230.div.get_text().split('\n'):
+        data_230 = data[0].div.get_text()
+        data_230 = data_230.replace("à ", "DELIMITERà ")
+        data_230 = data_230.replace("dans ", "DELIMITERdans ")
+        for e in data_230.split('DELIMITER'):
             sane_entry = _sanitize_entry(e, debug)
             if sane_entry is not None:
                 if debug:
-                    logging.info('found %s', sane_entry.encode('utf-8'))
+                    logging.info('found: %s', sane_entry.encode('utf-8'))
                 tt.append(_parse_entry(sane_entry, debug))
     return tt
