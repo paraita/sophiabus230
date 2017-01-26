@@ -10,7 +10,7 @@ from datetime import timedelta
 from dateutil.parser import parse
 from dateutil.tz import gettz
 from bs4 import BeautifulSoup
-from future.moves.urllib.request import urlopen
+from future.moves.urllib import request
 
 
 def _get_html_from_cg06(stop_id):
@@ -22,7 +22,7 @@ def _get_html_from_cg06(stop_id):
     :rtype: str
     """
     cg06_url = "http://cg06.tsi.cityway.fr/qrcode/?id={0}"
-    req = urlopen(cg06_url.format(stop_id))
+    req = request.urlopen(cg06_url.format(stop_id))
     content = req.read()
     return content
 

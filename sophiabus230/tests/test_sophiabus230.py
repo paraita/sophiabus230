@@ -8,6 +8,7 @@ from datetime import timedelta
 import sophiabus230
 from dateutil.tz import gettz
 from mock import patch
+from future.moves.urllib import request
 
 
 class TestSophiabus230(TestCase):
@@ -34,3 +35,12 @@ class TestSophiabus230(TestCase):
         # assert actual_bus_time.day == expected_bus_time.day
         # assert actual_bus_time.hour == expected_bus_time.hour
         # assert actual_bus_time.minute == expected_bus_time.minute
+
+    @patch('future.moves.urllib.request.urlopen')
+    def test_get_html_from_cg06(self, mock_urlopen):
+        parent_path = os.path.dirname(os.path.abspath(__file__))
+        with open(parent_path + os.sep + "example_content.html", 'rb') as fd:
+            mock_urlopen.return_value = fd
+            sophiabus230._get_html_from_cg06(1939)
+            assert mock_urlopen.called
+            mock_urlopen.assert_called_once_with('http://cg06.tsi.cityway.fr/qrcode/?id=1939')
