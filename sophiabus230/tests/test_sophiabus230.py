@@ -7,34 +7,59 @@ from datetime import datetime
 from datetime import timedelta
 import sophiabus230
 from dateutil.tz import gettz
+from dateutil.tz import tzfile
 from mock import patch
 from future.moves.urllib import request
 
 
 class TestSophiabus230(TestCase):
 
+    expected = [
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': None,
+         'is_real_time': True},
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': None,
+         'is_real_time': True},
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': None,
+         'is_real_time': True},
+        {'dest': u'Gambetta / France',
+         'bus_time': datetime(2017, 1, 26, 17, 37),
+         'is_real_time': True},
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': datetime(2017, 1, 26, 17, 42),
+         'is_real_time': False},
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': datetime(2017, 1, 26, 17, 52),
+         'is_real_time': False},
+        {'dest': u'Cathédrale-Vieille Ville',
+         'bus_time': datetime(2017, 1, 26, 17, 59),
+         'is_real_time': False},
+        {'dest': u'Gambetta / France',
+         'bus_time': datetime(2017, 1, 26, 18, 7),
+         'is_real_time': False}
+    ]
+
     @patch('sophiabus230._get_html_from_cg06')
     def test_get_next_buses(self, mock_content):
         parent_path = os.path.dirname(os.path.abspath(__file__))
         with open(parent_path + os.sep + "example_content.html", 'rb') as fd:
             mock_content.return_value = fd.read()
-        tz_paris = gettz('Europe/Paris')
         result_list = sophiabus230.get_next_buses(debug=True)
-        expected_bus_time = datetime.now(tz=tz_paris) + timedelta(minutes=9)
         self.assertEqual(len(result_list), 8)
         #TODO: add the expected tt's here (look at the logging stuff for the full list)
-        # actual_dest = result_list[0]['dest']
-        # actual_is_real_time = result_list[0]['is_real_time']
-        # actual_bus_time = result_list[0]['bus_time']
-        # expected_dest = u'Cathédrale-Vieille Ville'
-        # expected_is_real_time = True
-        # self.assertEqual(actual_dest, expected_dest)
-        # assert actual_is_real_time == expected_is_real_time
-        # assert actual_bus_time.year == expected_bus_time.year
-        # assert actual_bus_time.month == expected_bus_time.month
-        # assert actual_bus_time.day == expected_bus_time.day
-        # assert actual_bus_time.hour == expected_bus_time.hour
-        # assert actual_bus_time.minute == expected_bus_time.minute
+        for index in range(len(result_list)):
+            if index > 2:
+                actual_date = result_list[index]['bus_time']
+                expected_date = self.expected[index]['bus_time']
+                self.assertEqual(actual_date.year, expected_date.year)
+                self.assertEqual(actual_date.month, expected_date.month)
+                self.assertEqual(actual_date.day, expected_date.day)
+                self.assertEqual(actual_date.hour, expected_date.hour)
+                self.assertEqual(actual_date.minute, expected_date.minute)
+            self.assertEqual(result_list[index]['dest'], self.expected[index]['dest'])
+            self.assertEqual(result_list[index]['is_real_time'], self.expected[index]['is_real_time'])
 
     @patch('future.moves.urllib.request.urlopen')
     def test_get_html_from_cg06(self, mock_urlopen):
